@@ -98,23 +98,25 @@ export default function GuestsPage() {
       {loading ? (
         <p className="muted">Loading…</p>
       ) : (
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>RSVP</th>
-              <th>Table</th>
-              <th>Seat</th>
-              <th>Check-in</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((g) => (
-              <GuestRow key={g._id} guest={g} onSaved={replaceGuest} />
-            ))}
-          </tbody>
-        </table>
+        <div className="table-scroll">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th className="col-email">Email</th>
+                <th>RSVP</th>
+                <th>Table</th>
+                <th>Seat</th>
+                <th>Check-in</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((g) => (
+                <GuestRow key={g._id} guest={g} onSaved={replaceGuest} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

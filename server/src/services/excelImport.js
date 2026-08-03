@@ -6,17 +6,14 @@ import { generateQrToken } from './qr.js';
 
 // Maps normalized source headers to our canonical guest fields. Matching is
 // substring-based so small variations in the RSVP export ("Phone Number" vs
-// "Phone") still resolve correctly; unmapped columns (address, city, etc.)
-// are simply ignored.
+// "Phone") still resolve correctly. Only these four fields matter to this
+// app — everything else in the export (address, tags, party, RSVP, notes,
+// phone) is ignored.
 const HEADER_RULES = [
   { field: 'firstName', patterns: ['first name', 'firstname'] },
   { field: 'lastName', patterns: ['last name', 'lastname'] },
   { field: 'envelopeName', patterns: ['envelope name'] },
   { field: 'email', patterns: ['email'] },
-  { field: 'phone', patterns: ['phone'] },
-  { field: 'tags', patterns: ['tags'] },
-  { field: 'partyId', patterns: ['party'] },
-  { field: 'rsvp', patterns: ['rsvp'] },
 ];
 
 function normalizeHeader(value) {
@@ -30,21 +27,6 @@ function normalizeHeader(value) {
 function matchField(normalizedHeader) {
   const rule = HEADER_RULES.find((r) => r.patterns.some((p) => normalizedHeader.includes(p)));
   return rule?.field ?? null;
-}
-
-function parseRsvp(raw) {
-  const value = String(raw ?? '').toLowerCase();
-  if (!value.trim()) return 'pending';
-  if (value.includes('decline') || value.includes('no,') || value === 'no') return 'no';
-  if (value.includes('yes')) return 'yes';
-  return 'pending';
-}
-
-function parseTags(raw) {
-  return String(raw ?? '')
-    .split(',')
-    .map((t) => t.trim())
-    .filter(Boolean);
 }
 
 async function loadWorkbook(buffer, filename) {
@@ -91,10 +73,6 @@ export async function parseGuestRows(buffer, filename) {
       lastName: String(raw.lastName ?? '').trim(),
       envelopeName: String(raw.envelopeName ?? '').trim(),
       email: String(raw.email ?? '').trim().toLowerCase(),
-      phone: String(raw.phone ?? '').trim(),
-      tags: parseTags(raw.tags),
-      partyId: String(raw.partyId ?? '').trim(),
-      rsvpStatus: parseRsvp(raw.rsvp),
     });
   });
 
@@ -103,16 +81,16 @@ export async function parseGuestRows(buffer, filename) {
 
 function matchKeyFor(row) {
   if (row.email) return `email:${row.email}`;
-  return `name:${row.firstName.toLowerCase()}|${row.lastName.toLowerCase()}|${row.partyId.toLowerCase()}`;
+  return `name:${row.firstName.toLowerCase()}|${row.lastName.toLowerCase()}`;
 }
 
 // Classifies each parsed row as new / updated / unchanged against the
 // current DB state, without writing anything.
 export async function buildImportPlan(rows) {
-  const existing = await Guest.find({}, 'firstName lastName email partyId tags rsvpStatus').lean();
+  const existing = await Guest.find({}, 'firstName lastName envelopeName email').lean();
   const byKey = new Map();
   for (const g of existing) {
-    byKey.set(matchKeyFor({ ...g, email: g.email ?? '', partyId: g.partyId ?? '' }), g);
+    byKey.set(matchKeyFor({ ...g, email: g.email ?? '' }), g);
   }
 
   const plan = rows.map((row) => {
@@ -121,8 +99,8 @@ export async function buildImportPlan(rows) {
     const changed =
       match.firstName !== row.firstName ||
       match.lastName !== row.lastName ||
-      match.rsvpStatus !== row.rsvpStatus ||
-      JSON.stringify(match.tags ?? []) !== JSON.stringify(row.tags);
+      match.envelopeName !== row.envelopeName ||
+      match.email !== row.email;
     return { action: changed ? 'update' : 'unchanged', row, existingId: match._id };
   });
 
@@ -156,10 +134,6 @@ export async function applyImportPlan(plan) {
             lastName: item.row.lastName,
             envelopeName: item.row.envelopeName,
             email: item.row.email,
-            phone: item.row.phone,
-            tags: item.row.tags,
-            partyId: item.row.partyId,
-            rsvpStatus: item.row.rsvpStatus,
           },
         }
       );

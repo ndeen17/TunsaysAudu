@@ -55,7 +55,7 @@ function DesignEditor({ design, onChanged }) {
         </button>
       </div>
 
-      <div className="design-canvas">
+      <div className="design-canvas" style={{ aspectRatio: `${bg.width} / ${bg.height}` }}>
         <img
           ref={imgRef}
           src={`/api/invites/background?t=${design.background.updatedAt}`}

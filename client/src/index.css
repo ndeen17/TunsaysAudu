@@ -31,6 +31,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
+  overflow-x: hidden;
 }
 
 button,
@@ -177,6 +178,28 @@ select {
   flex-wrap: wrap;
 }
 
+@media (max-width: 640px) {
+  .app-header {
+    gap: 0.5rem 1rem;
+  }
+
+  /* Title + logout share the first line; nav gets its own full-width row
+     below so links don't scatter across three ragged lines. */
+  .app-title {
+    flex: 1;
+  }
+
+  .app-nav {
+    order: 3;
+    flex: 1 1 100%;
+    gap: 0.25rem 1rem;
+  }
+
+  .app-nav a {
+    padding: 0.25rem 0;
+  }
+}
+
 .app-nav a {
   color: var(--muted);
   text-decoration: none;
@@ -274,17 +297,20 @@ button.secondary {
 
 .design-canvas {
   position: relative;
-  display: inline-block;
-  max-width: 100%;
-  line-height: 0;
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  background: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 .design-canvas img {
-  max-width: 100%;
-  height: auto;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   cursor: crosshair;
-  border: 1px solid var(--border);
-  border-radius: 6px;
 }
 
 .design-marker {
@@ -350,13 +376,18 @@ button.secondary {
 }
 
 /* Guests table */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
   background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
 }
 
 .data-table th,
@@ -364,10 +395,30 @@ button.secondary {
   text-align: left;
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 
 .cell-input {
-  width: 5rem;
+  width: 4rem;
+}
+
+@media (max-width: 560px) {
+  /* Email isn't needed for the door/seating workflow and is the widest
+     column — dropping it lets Name/RSVP/Table/Seat/Check-in fit most
+     phones without horizontal scrolling. */
+  .col-email {
+    display: none;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.45rem 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .cell-input {
+    width: 3rem;
+  }
 }
 
 .badge {

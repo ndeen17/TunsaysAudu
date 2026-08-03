@@ -93,7 +93,7 @@ export default function ScannerPage() {
   return (
     <div className="scanner-screen">
       <div className="scanner-topbar">
-        <span>{stats ? `${stats.checkedIn} / ${stats.totalYes} checked in` : '—'}</span>
+        <span>{stats ? `${stats.checkedIn} / ${stats.total} checked in` : '—'}</span>
         <div>
           <span className="muted">{user?.username}</span>
           <button className="link-button" onClick={onLogout}>

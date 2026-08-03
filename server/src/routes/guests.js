@@ -10,17 +10,16 @@ function escapeRegex(str) {
 }
 
 // Security staff only ever see what they need at the door: name + table/seat
-// + check-in state. Organizers see everything (contact info, tags, RSVP).
+// + check-in state. Organizers see everything (email, name).
 const SECURITY_FIELDS = 'firstName lastName table seat checkedIn checkinEvents qrToken';
 
 router.get('/', async (req, res) => {
-  const { q, rsvp, checkedIn } = req.query;
+  const { q, checkedIn } = req.query;
   const filter = {};
   if (q) {
     const re = new RegExp(escapeRegex(String(q)), 'i');
     filter.$or = [{ firstName: re }, { lastName: re }, { envelopeName: re }];
   }
-  if (rsvp) filter.rsvpStatus = rsvp;
   if (checkedIn === 'true') filter.checkedIn = true;
   if (checkedIn === 'false') filter.checkedIn = false;
 
@@ -30,12 +29,11 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/stats', async (req, res) => {
-  const [totalYes, checkedIn, total] = await Promise.all([
-    Guest.countDocuments({ rsvpStatus: 'yes' }),
-    Guest.countDocuments({ checkedIn: true }),
+  const [total, checkedIn] = await Promise.all([
     Guest.countDocuments({}),
+    Guest.countDocuments({ checkedIn: true }),
   ]);
-  res.json({ total, totalYes, checkedIn });
+  res.json({ total, checkedIn });
 });
 
 router.patch('/:id', requireRole('organizer'), async (req, res) => {
