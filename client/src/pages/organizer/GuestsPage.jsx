@@ -21,7 +21,7 @@ function GuestRow({ guest, onSaved }) {
       <td>
         {guest.firstName} {guest.lastName}
       </td>
-      <td className="muted">{guest.email}</td>
+      <td className="muted col-email">{guest.email}</td>
       <td>
         <span className={`badge badge-${guest.rsvpStatus}`}>{guest.rsvpStatus}</span>
       </td>

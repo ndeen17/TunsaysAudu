@@ -113,6 +113,42 @@ select {
   font-size: 0.9rem;
 }
 
+.role-picker {
+  width: min(420px, 100%);
+}
+
+.role-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  text-align: left;
+}
+
+.role-choice:hover {
+  border-color: var(--accent);
+}
+
+.role-choice-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.role-choice-blurb {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.back-link {
+  align-self: flex-start;
+  font-size: 0.85rem;
+}
+
 /* App shell */
 .app-shell {
   min-height: 100vh;
