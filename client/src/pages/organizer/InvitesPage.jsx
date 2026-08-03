@@ -195,10 +195,6 @@ export default function InvitesPage() {
 
       <div className="card">
         <h2>Invite background</h2>
-        <p className="muted">
-          Upload the finished invite artwork (from Canva's normal editor, a designer, or a photo) with empty space for
-          the guest's name and QR code. You'll place both in the editor below.
-        </p>
         <label className="file-input">
           <input type="file" accept="image/png,image/jpeg" onChange={onUpload} disabled={uploading} />
           {design?.background ? 'Replace image' : 'Upload image'}
@@ -208,10 +204,6 @@ export default function InvitesPage() {
       {design?.background && <DesignEditor design={design} onChanged={setDesign} />}
 
       {error && <p className="error-text">{error}</p>}
-
-      {!ready && design && (
-        <p className="muted">Upload a background and save a layout above before generating invites.</p>
-      )}
 
       {ready && (
         <>

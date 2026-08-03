@@ -5,7 +5,6 @@ import Login from './pages/Login.jsx';
 import ScannerPage from './pages/ScannerPage.jsx';
 import OrganizerLayout from './pages/organizer/OrganizerLayout.jsx';
 import GuestsPage from './pages/organizer/GuestsPage.jsx';
-import ImportPage from './pages/organizer/ImportPage.jsx';
 import InvitesPage from './pages/organizer/InvitesPage.jsx';
 
 export default function App() {
@@ -30,7 +29,6 @@ export default function App() {
           }
         >
           <Route index element={<GuestsPage />} />
-          <Route path="import" element={<ImportPage />} />
           <Route path="invites" element={<InvitesPage />} />
         </Route>
       </Routes>

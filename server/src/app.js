@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth.js';
-import importRoutes from './routes/import.js';
 import guestRoutes from './routes/guests.js';
 import inviteRoutes from './routes/invites.js';
 import checkinRoutes from './routes/checkin.js';
@@ -17,7 +16,6 @@ export function createApp() {
   app.use(cookieParser());
 
   app.use('/api/auth', authRoutes);
-  app.use('/api/import', importRoutes);
   app.use('/api/guests', guestRoutes);
   app.use('/api/invites', inviteRoutes);
   app.use('/api/checkin', checkinRoutes);
