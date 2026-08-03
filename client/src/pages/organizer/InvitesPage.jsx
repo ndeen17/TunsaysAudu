@@ -234,9 +234,9 @@ export default function InvitesPage() {
 
           <div className="card">
             <h2>Batch</h2>
-            <p className="muted">Generates an invite for every guest who RSVP'd yes and downloads a zip.</p>
+            <p className="muted">Generates an invite for every guest in the list and downloads a zip.</p>
             <button onClick={generateAll} disabled={batchBusy}>
-              {batchBusy ? 'Generating all…' : 'Generate all (RSVP yes)'}
+              {batchBusy ? 'Generating all…' : 'Generate all guests'}
             </button>
           </div>
         </>

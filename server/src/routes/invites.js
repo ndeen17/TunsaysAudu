@@ -114,7 +114,7 @@ router.get('/:guestId', async (req, res) => {
 
 router.post('/batch', async (req, res) => {
   const { guestIds, all } = req.body ?? {};
-  const filter = all ? { rsvpStatus: 'yes' } : { _id: { $in: guestIds ?? [] } };
+  const filter = all ? {} : { _id: { $in: guestIds ?? [] } };
   const guests = await Guest.find(filter);
   if (guests.length === 0) return res.status(400).json({ error: 'No matching guests' });
 

@@ -21,7 +21,6 @@ async function makeGuest(overrides = {}) {
     firstName: 'Jane',
     lastName: 'Doe',
     qrToken: generateQrToken(),
-    rsvpStatus: 'yes',
     table: '5',
     seat: '2',
     ...overrides,
@@ -106,13 +105,12 @@ describe('security role field restriction on GET /api/guests', () => {
   afterEach(clearCollections);
   afterAll(disconnect);
 
-  test('security responses omit email/phone; organizer responses include them', async () => {
-    await makeGuest({ email: 'jane@example.com', phone: '+1234' });
+  test('security responses omit email; organizer responses include it', async () => {
+    await makeGuest({ email: 'jane@example.com' });
 
     const security = await loginAs('security');
     const secRes = await security.get('/api/guests');
     expect(secRes.body[0].email).toBeUndefined();
-    expect(secRes.body[0].phone).toBeUndefined();
     expect(secRes.body[0].firstName).toBe('Jane');
 
     const organizer = await loginAs('organizer');

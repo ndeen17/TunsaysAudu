@@ -19,24 +19,24 @@ function loadSampleRows() {
 }
 
 describe('parseGuestRows (pure, no DB)', () => {
-  test('maps RSVP-export columns onto guest fields', async () => {
+  test('maps the guest-list columns onto firstName/lastName/envelopeName/email', async () => {
     const rows = await loadSampleRows();
     expect(rows.length).toBe(15);
 
     const ada = rows.find((r) => r.firstName === 'Ada');
-    expect(ada).toMatchObject({
+    expect(ada).toEqual({
+      firstName: 'Ada',
       lastName: 'Okafor',
+      envelopeName: 'Ada Okafor',
       email: 'ada.okafor.sample@example.com',
-      partyId: 'party-001',
-      rsvpStatus: 'yes',
     });
-    expect(ada.tags).toEqual(['Bride Guests', 'Full Day guest']);
   });
 
-  test('parses declined and blank RSVP values', async () => {
+  test('ignores any other columns present in the file', async () => {
     const rows = await loadSampleRows();
-    expect(rows.find((r) => r.firstName === 'Kwame').rsvpStatus).toBe('no');
-    expect(rows.find((r) => r.firstName === 'Amara').rsvpStatus).toBe('pending');
+    for (const row of rows) {
+      expect(Object.keys(row).sort()).toEqual(['email', 'envelopeName', 'firstName', 'lastName']);
+    }
   });
 });
 
@@ -84,19 +84,19 @@ describe('import plan + apply (requires DB)', () => {
     expect(after.map((g) => g.qrToken)).toEqual(before.map((g) => g.qrToken));
   });
 
-  test('a changed RSVP status on re-import is applied without touching the qrToken', async () => {
+  test('a changed envelope name on re-import is applied without touching the qrToken', async () => {
     const { plan: firstPlan } = await buildImportPlan(await loadSampleRows());
     await applyImportPlan(firstPlan);
-    const originalToken = (await Guest.findOne({ firstName: 'Amara' })).qrToken;
+    const originalToken = (await Guest.findOne({ firstName: 'Emeka' })).qrToken;
 
     const updatedRows = await loadSampleRows();
-    updatedRows.find((r) => r.firstName === 'Amara').rsvpStatus = 'yes';
+    updatedRows.find((r) => r.firstName === 'Emeka').envelopeName = 'Mr Emeka Nwosu';
     const { plan: secondPlan, summary } = await buildImportPlan(updatedRows);
     expect(summary.update).toBe(1);
     await applyImportPlan(secondPlan);
 
-    const amara = await Guest.findOne({ firstName: 'Amara' });
-    expect(amara.rsvpStatus).toBe('yes');
-    expect(amara.qrToken).toBe(originalToken);
+    const emeka = await Guest.findOne({ firstName: 'Emeka' });
+    expect(emeka.envelopeName).toBe('Mr Emeka Nwosu');
+    expect(emeka.qrToken).toBe(originalToken);
   });
 });

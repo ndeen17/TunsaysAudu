@@ -23,9 +23,6 @@ function GuestRow({ guest, onSaved }) {
       </td>
       <td className="muted col-email">{guest.email}</td>
       <td>
-        <span className={`badge badge-${guest.rsvpStatus}`}>{guest.rsvpStatus}</span>
-      </td>
-      <td>
         <input
           className="cell-input"
           value={table}
@@ -51,18 +48,16 @@ function GuestRow({ guest, onSaved }) {
 export default function GuestsPage() {
   const [guests, setGuests] = useState([]);
   const [q, setQ] = useState('');
-  const [rsvp, setRsvp] = useState('');
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     const params = {};
     if (q) params.q = q;
-    if (rsvp) params.rsvp = rsvp;
     const data = await get('/guests', params);
     setGuests(data);
     setLoading(false);
-  }, [q, rsvp]);
+  }, [q]);
 
   useEffect(() => {
     const timer = setTimeout(load, 250);
@@ -73,25 +68,15 @@ export default function GuestsPage() {
     setGuests((prev) => prev.map((g) => (g._id === updated._id ? updated : g)));
   }
 
-  // Group by party so couples / plus-ones sit next to each other, which is
-  // the main aid the seating screen gives the organizer.
-  const sorted = [...guests].sort((a, b) => {
-    const pa = a.partyId || `zzz-${a._id}`;
-    const pb = b.partyId || `zzz-${b._id}`;
-    return pa === pb ? a.firstName.localeCompare(b.firstName) : pa.localeCompare(pb);
-  });
+  const sorted = [...guests].sort(
+    (a, b) => a.firstName.localeCompare(b.firstName) || a.lastName.localeCompare(b.lastName)
+  );
 
   return (
     <div className="stack">
       <h1>Guests &amp; seating</h1>
       <div className="toolbar">
         <input placeholder="Search name…" value={q} onChange={(e) => setQ(e.target.value)} />
-        <select value={rsvp} onChange={(e) => setRsvp(e.target.value)}>
-          <option value="">All RSVPs</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-          <option value="pending">Pending</option>
-        </select>
         <span className="muted">{guests.length} guests</span>
       </div>
 
@@ -104,7 +89,6 @@ export default function GuestsPage() {
               <tr>
                 <th>Name</th>
                 <th className="col-email">Email</th>
-                <th>RSVP</th>
                 <th>Table</th>
                 <th>Seat</th>
                 <th>Check-in</th>
