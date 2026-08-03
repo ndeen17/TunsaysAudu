@@ -13,11 +13,11 @@
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
     "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
-    "exceljs": "^4.4.0",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.0",

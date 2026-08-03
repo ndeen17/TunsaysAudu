@@ -4,7 +4,6 @@ import archiver from 'archiver';
 import sharp from 'sharp';
 import Guest from '../models/Guest.js';
 import Asset from '../models/Asset.js';
-import InviteLayout from '../models/InviteLayout.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { renderInvitePng } from '../services/inviteRenderer.js';
 import { qrPngBuffer, generateQrToken } from '../services/qr.js';
@@ -20,25 +19,19 @@ function fileNameFor(guest) {
   return `${base || guest._id}.png`;
 }
 
-async function loadDesign() {
-  const [background, layout] = await Promise.all([
-    Asset.findOne({ key: BACKGROUND_KEY }),
-    InviteLayout.findOne({ key: 'default' }),
-  ]);
-  if (!background || !layout) {
-    const err = new Error('Upload an invite background and save a layout before generating invites');
+async function loadBackground() {
+  const background = await Asset.findOne({ key: BACKGROUND_KEY });
+  if (!background) {
+    const err = new Error('Upload an invite background before generating invites');
     err.status = 409;
     throw err;
   }
-  return { background, layout };
+  return background;
 }
 
 router.get('/design', async (req, res) => {
-  const [background, layout] = await Promise.all([
-    Asset.findOne({ key: BACKGROUND_KEY }, 'width height updatedAt'),
-    InviteLayout.findOne({ key: 'default' }),
-  ]);
-  res.json({ background, layout });
+  const background = await Asset.findOne({ key: BACKGROUND_KEY }, 'width height updatedAt');
+  res.json({ background });
 });
 
 router.post('/background', upload.single('file'), async (req, res) => {
@@ -49,18 +42,6 @@ router.post('/background', upload.single('file'), async (req, res) => {
     { key: BACKGROUND_KEY, mimeType: req.file.mimetype, data: req.file.buffer, width: meta.width, height: meta.height },
     { upsert: true, new: true, projection: 'width height updatedAt' }
   );
-
-  // Seed a sensible default layout the first time, so the editor always has
-  // something to show/tweak rather than requiring every field up front.
-  const existingLayout = await InviteLayout.findOne({ key: 'default' });
-  if (!existingLayout) {
-    await InviteLayout.create({
-      key: 'default',
-      namePos: { x: Math.round(meta.width / 2), y: Math.round(meta.height * 0.7) },
-      qrPos: { x: Math.round(meta.width / 2 - 110), y: Math.round(meta.height * 0.78) },
-    });
-  }
-
   res.json(asset);
 });
 
@@ -71,21 +52,11 @@ router.get('/background', async (req, res) => {
   res.send(asset.data);
 });
 
-router.put('/layout', async (req, res) => {
-  const { namePos, nameStyle, qrPos, qrSize } = req.body ?? {};
-  const layout = await InviteLayout.findOneAndUpdate(
-    { key: 'default' },
-    { $set: { namePos, nameStyle, qrPos, qrSize } },
-    { upsert: true, new: true, runValidators: true }
-  );
-  res.json(layout);
-});
-
 router.get('/preview', async (req, res) => {
   try {
-    const { background, layout } = await loadDesign();
+    const background = await loadBackground();
     const qrBuffer = await qrPngBuffer(generateQrToken());
-    const png = await renderInvitePng({ backgroundBuffer: background.data, layout, displayName: 'Jane Doe', qrBuffer });
+    const png = await renderInvitePng({ backgroundBuffer: background.data, displayName: 'Jane Doe', qrBuffer });
     res.set('Content-Type', 'image/png');
     res.send(png);
   } catch (err) {
@@ -98,10 +69,10 @@ router.get('/:guestId', async (req, res) => {
   if (!guest) return res.status(404).json({ error: 'Guest not found' });
 
   try {
-    const { background, layout } = await loadDesign();
+    const background = await loadBackground();
     const displayName = guest.envelopeName || `${guest.firstName} ${guest.lastName}`.trim();
     const qrBuffer = await qrPngBuffer(guest.qrToken);
-    const png = await renderInvitePng({ backgroundBuffer: background.data, layout, displayName, qrBuffer });
+    const png = await renderInvitePng({ backgroundBuffer: background.data, displayName, qrBuffer });
     guest.inviteGeneratedAt = new Date();
     await guest.save();
     res.set('Content-Type', 'image/png');
@@ -118,9 +89,9 @@ router.post('/batch', async (req, res) => {
   const guests = await Guest.find(filter);
   if (guests.length === 0) return res.status(400).json({ error: 'No matching guests' });
 
-  let design;
+  let background;
   try {
-    design = await loadDesign();
+    background = await loadBackground();
   } catch (err) {
     return res.status(err.status || 500).json({ error: err.message });
   }
@@ -135,7 +106,7 @@ router.post('/batch', async (req, res) => {
     try {
       const displayName = guest.envelopeName || `${guest.firstName} ${guest.lastName}`.trim();
       const qrBuffer = await qrPngBuffer(guest.qrToken);
-      const png = await renderInvitePng({ backgroundBuffer: design.background.data, layout: design.layout, displayName, qrBuffer });
+      const png = await renderInvitePng({ backgroundBuffer: background.data, displayName, qrBuffer });
       guest.inviteGeneratedAt = new Date();
       await guest.save();
       archive.append(png, { name: fileNameFor(guest) });

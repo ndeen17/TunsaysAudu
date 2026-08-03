@@ -18,7 +18,6 @@ export default function OrganizerLayout() {
           <NavLink to="/" end>
             Guests &amp; Seating
           </NavLink>
-          <NavLink to="/import">Import</NavLink>
           <NavLink to="/invites">Invites</NavLink>
           <NavLink to="/scanner">Scanner</NavLink>
         </nav>
