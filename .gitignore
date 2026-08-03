@@ -1,0 +1,21 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+# real guest data must never be committed — see /data/README
+/data/*.xlsx
+/data/*.xls
+/data/guests*.csv
+!/data/sample-guests.csv
+
+# build output
+client/dist/
+server/dist/
+
+# logs
+*.log
+npm-debug.log*
+
+.DS_Store
+Thumbs.db

@@ -1,0 +1,39 @@
+import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthContext.jsx';
+import { ProtectedRoute } from './auth/ProtectedRoute.jsx';
+import Login from './pages/Login.jsx';
+import ScannerPage from './pages/ScannerPage.jsx';
+import OrganizerLayout from './pages/organizer/OrganizerLayout.jsx';
+import GuestsPage from './pages/organizer/GuestsPage.jsx';
+import ImportPage from './pages/organizer/ImportPage.jsx';
+import InvitesPage from './pages/organizer/InvitesPage.jsx';
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/scanner"
+          element={
+            <ProtectedRoute roles={['organizer', 'security']}>
+              <ScannerPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute roles={['organizer']}>
+              <OrganizerLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<GuestsPage />} />
+          <Route path="import" element={<ImportPage />} />
+          <Route path="invites" element={<InvitesPage />} />
+        </Route>
+      </Routes>
+    </AuthProvider>
+  );
+}

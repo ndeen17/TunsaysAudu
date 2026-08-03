@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: wedding-qr-app
+    runtime: node
+    plan: starter
+    buildCommand: npm install --prefix server && npm install --prefix client && npm run build --prefix client
+    startCommand: npm start --prefix server
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
