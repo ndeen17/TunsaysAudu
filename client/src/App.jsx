@@ -28,8 +28,8 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<GuestsPage />} />
-          <Route path="invites" element={<InvitesPage />} />
+          <Route index element={<InvitesPage />} />
+          <Route path="guests" element={<GuestsPage />} />
         </Route>
       </Routes>
     </AuthProvider>

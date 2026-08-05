@@ -16,9 +16,9 @@ export default function OrganizerLayout() {
         <span className="app-title">Wedding Invites</span>
         <nav className="app-nav">
           <NavLink to="/" end>
-            Guests &amp; Seating
+            Invites
           </NavLink>
-          <NavLink to="/invites">Invites</NavLink>
+          <NavLink to="/guests">Guests &amp; Seating</NavLink>
           <NavLink to="/scanner">Scanner</NavLink>
         </nav>
         <div className="app-header-right">

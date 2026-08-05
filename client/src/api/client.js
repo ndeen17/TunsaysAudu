@@ -31,19 +31,6 @@ export function patch(path, data) {
   }).then(handle);
 }
 
-export function put(path, data) {
-  return fetch(`/api${path}`, {
-    method: 'PUT',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data ?? {}),
-  }).then(handle);
-}
-
-export function postForm(path, formData) {
-  return fetch(`/api${path}`, { method: 'POST', credentials: 'include', body: formData }).then(handle);
-}
-
 // For binary responses (invite PNG / zip download) — triggers a browser
 // download rather than trying to parse the body as JSON.
 export async function downloadFile(path, options = {}) {

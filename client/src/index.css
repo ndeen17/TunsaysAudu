@@ -1,26 +1,17 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --bg: #faf7f2;
-  --fg: #2a2420;
-  --card-bg: #ffffff;
-  --border: #e4ddd2;
-  --accent: #8a6d4b;
-  --muted: #7a7268;
-  --green: #16a34a;
-  --amber: #d97706;
-  --red: #dc2626;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1c1a17;
-    --fg: #f2ede6;
-    --card-bg: #2a2622;
-    --border: #423c34;
-    --accent: #c9a876;
-    --muted: #a89e90;
-  }
+  --bg: #2b0404;
+  --bg-vignette: radial-gradient(120% 90% at 50% 20%, #4d0909 0%, #2b0404 70%);
+  --fg: #f6ede1;
+  --card-bg: #4a0a0a;
+  --border: rgba(246, 237, 225, 0.18);
+  --accent: #c9a45c;
+  --accent-fg: #2b0404;
+  --muted: rgba(246, 237, 225, 0.68);
+  --green: #34d399;
+  --amber: #fb923c;
+  --red: #ff6b6b;
 }
 
 * {
@@ -29,9 +20,18 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--bg-vignette);
+  background-attachment: fixed;
   color: var(--fg);
   overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+.app-title {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-weight: 700;
 }
 
 button,
@@ -43,7 +43,8 @@ select {
 button {
   cursor: pointer;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-fg);
+  font-weight: 600;
   border: none;
   border-radius: 8px;
   padding: 0.6rem 1rem;
@@ -75,16 +76,6 @@ select {
   background: none;
   color: var(--accent);
   padding: 0;
-}
-
-.button-link {
-  display: inline-block;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  text-decoration: none;
-  margin-top: 0.5rem;
 }
 
 /* Auth */
@@ -268,94 +259,20 @@ select {
   flex-wrap: wrap;
 }
 
-.file-input {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  width: fit-content;
-  cursor: pointer;
-}
-
-.file-input input {
-  display: none;
-}
-
 button.secondary {
   background: var(--border);
   color: var(--fg);
 }
 
-.checkbox-label {
-  flex-direction: row !important;
+.invite-preview-card {
   align-items: center;
-  gap: 0.4rem !important;
 }
 
-.design-canvas {
-  position: relative;
-  display: block;
-  width: 100%;
-  max-width: 420px;
-  background: var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.design-canvas img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  cursor: crosshair;
-}
-
-.design-marker {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  line-height: normal;
-}
-
-.name-marker {
-  background: rgba(220, 38, 38, 0.85);
-  color: #fff;
-  font-size: 0.7rem;
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-.qr-marker {
-  border: 2px dashed rgba(220, 38, 38, 0.85);
-  border-radius: 4px;
-}
-
-.design-controls {
-  display: flex;
-  gap: 1.25rem;
-  flex-wrap: wrap;
-  align-items: flex-end;
-}
-
-.design-controls label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.85rem;
-}
-
-.design-controls input[type='number'] {
-  width: 5.5rem;
-}
-
-.design-preview {
+.invite-preview {
   max-width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  width: 340px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .result-list {
