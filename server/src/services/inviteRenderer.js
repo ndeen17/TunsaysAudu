@@ -3,7 +3,7 @@ import { inviteFontFaceCss, DISPLAY_FONT_FAMILY, BODY_FONT_FAMILY } from './font
 import { INVITE_CONTENT } from './inviteContent.js';
 
 const WIDTH = 1080;
-const HEIGHT = 1300;
+const HEIGHT = 1480;
 
 const COLOR = {
   bgDark: '#2b0404',
@@ -123,44 +123,38 @@ export async function renderInvitePng({ displayName, qrBuffer }) {
   y += 70;
   parts.push(text(cx, y, c.location, { size: 30, weight: 500, spacing: 6, fill: COLOR.cream }));
 
-  // Guest QR box.
-  const boxWidth = 860;
-  const boxHeight = 200;
+  // Guest QR box — name, then a large centered QR, then a short note,
+  // stacked vertically so the code itself is the dominant, easy-to-scan
+  // element rather than sharing width with text.
+  const boxWidth = WIDTH * 0.62;
   const boxX = cx - boxWidth / 2;
   const boxY = y + 60;
-  const qrSize = 150;
-  const qrPad = 34;
-  const qrX = boxX + qrPad;
-  const qrY = boxY + (boxHeight - qrSize) / 2;
+  const qrSize = WIDTH * 0.26;
+  const nameSize = 32;
+  const noteSize = 23;
+  const padTop = 44;
+  const padBottom = 44;
+  const gapAfterName = 30;
+  const gapAfterQr = 30;
+  const noteLines = wrapText('Please scan this QR code at the venue for entry', boxWidth - 80, noteSize, 0.48);
+  const noteBlockHeight = noteLines.length * noteSize * 1.35;
+  const boxHeight = padTop + nameSize * 1.2 + gapAfterName + qrSize + gapAfterQr + noteBlockHeight + padBottom;
+
+  parts.push(
+    `<rect x="${boxX}" y="${boxY}" width="${boxWidth}" height="${boxHeight}" rx="18" fill="rgba(246,237,225,0.05)" stroke="${COLOR.gold}" stroke-width="1.5" />`
+  );
+
+  let innerY = boxY + padTop + nameSize;
+  parts.push(text(cx, innerY, displayName.toUpperCase(), { size: nameSize, weight: 800, fill: COLOR.gold, spacing: 1 }));
+
+  const qrTop = innerY + gapAfterName;
+  const qrLeft = cx - qrSize / 2;
   const qrBase64 = qrBuffer.toString('base64');
+  parts.push(`<rect x="${qrLeft - 10}" y="${qrTop - 10}" width="${qrSize + 20}" height="${qrSize + 20}" rx="10" fill="#ffffff" />`);
+  parts.push(`<image href="data:image/png;base64,${qrBase64}" x="${qrLeft}" y="${qrTop}" width="${qrSize}" height="${qrSize}" />`);
 
-  parts.push(
-    `<rect x="${boxX}" y="${boxY}" width="${boxWidth}" height="${boxHeight}" rx="14" fill="rgba(246,237,225,0.05)" stroke="${COLOR.gold}" stroke-width="1.5" />`
-  );
-  parts.push(`<rect x="${qrX - 6}" y="${qrY - 6}" width="${qrSize + 12}" height="${qrSize + 12}" rx="8" fill="#ffffff" />`);
-  parts.push(`<image href="data:image/png;base64,${qrBase64}" x="${qrX}" y="${qrY}" width="${qrSize}" height="${qrSize}" />`);
-
-  const textStartX = qrX + qrSize + 44;
-  const textBlockWidth = boxX + boxWidth - 36 - textStartX;
-  parts.push(
-    text(textStartX, boxY + 78, displayName.toUpperCase(), {
-      size: 32,
-      weight: 800,
-      fill: COLOR.gold,
-      spacing: 1,
-      anchor: 'start',
-    })
-  );
-  const noteLines = wrapText('Please scan this QR code at the venue for entry', textBlockWidth, 22, 0.48);
-  parts.push(
-    textLines(textStartX, boxY + 116, noteLines, {
-      size: 22,
-      family: BODY_FONT_FAMILY,
-      fill: COLOR.creamMuted,
-      anchor: 'start',
-      lineHeight: 30,
-    })
-  );
+  innerY = qrTop + qrSize + gapAfterQr + noteSize;
+  parts.push(textLines(cx, innerY, noteLines, { size: noteSize, family: BODY_FONT_FAMILY, fill: COLOR.creamMuted, lineHeight: noteSize * 1.35 }));
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}">${parts.join('\n')}</svg>`;
   return sharp(Buffer.from(svg)).png().toBuffer();
