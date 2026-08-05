@@ -5,7 +5,7 @@ import { useAuth } from '../auth/AuthContext.jsx';
 const ROLE_INFO = {
   organizer: {
     label: 'Organizer',
-    blurb: 'Import guests, assign seating, generate invites',
+    blurb: 'Generate invites, assign seating',
     heading: 'Organizer sign in',
   },
   security: {
