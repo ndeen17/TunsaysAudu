@@ -403,6 +403,20 @@ button.secondary {
   font-weight: 600;
 }
 
+.checkin-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.checkin-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
 .result-card button {
   font-size: 1.1rem;
   padding: 0.9rem 2rem;
@@ -423,4 +437,5 @@ button.secondary {
 
 .override-button {
   background: #111;
+  color: #fff;
 }

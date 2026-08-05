@@ -12,3 +12,5 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: PUBLIC_APP_URL
+        sync: false

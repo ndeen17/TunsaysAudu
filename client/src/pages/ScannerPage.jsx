@@ -3,6 +3,7 @@ import { BrowserQRCodeReader } from '@zxing/browser';
 import { useNavigate } from 'react-router-dom';
 import { get, post } from '../api/client.js';
 import { useAuth } from '../auth/AuthContext.jsx';
+import CheckinResultCard from '../components/CheckinResultCard.jsx';
 
 export default function ScannerPage() {
   const { logout, user } = useAuth();
@@ -30,16 +31,32 @@ export default function ScannerPage() {
     const reader = new BrowserQRCodeReader();
     let cancelled = false;
 
+    function onDecoded(decoded) {
+      if (cancelled || busyRef.current || !decoded) return;
+      busyRef.current = true;
+      handleScan(decoded.getText());
+    }
+
+    // Ask for the rear ("environment") camera explicitly — on phones,
+    // letting the browser pick a default device often selects the
+    // front-facing camera instead, which can't usefully see a QR code held
+    // up in front of the guest. `ideal` (not `exact`) so it still falls
+    // back gracefully on devices/laptops with only one camera.
     reader
-      .decodeFromVideoDevice(undefined, videoRef.current, (decoded) => {
-        if (cancelled || busyRef.current || !decoded) return;
-        busyRef.current = true;
-        handleScan(decoded.getText());
-      })
+      .decodeFromConstraints({ video: { facingMode: { ideal: 'environment' } } }, videoRef.current, onDecoded)
       .then((controls) => {
         controlsRef.current = controls;
       })
-      .catch((err) => setCameraError(err.message));
+      .catch((err) => {
+        // Some browsers/devices reject the facingMode constraint outright
+        // rather than degrading gracefully — retry with no constraint.
+        reader
+          .decodeFromVideoDevice(undefined, videoRef.current, onDecoded)
+          .then((controls) => {
+            controlsRef.current = controls;
+          })
+          .catch((err2) => setCameraError(err2.message || err.message));
+      });
 
     return () => {
       cancelled = true;
@@ -105,7 +122,12 @@ export default function ScannerPage() {
       {!result && (
         <>
           <video ref={videoRef} className="scanner-video" muted playsInline />
-          {cameraError && <p className="error-text">Camera unavailable: {cameraError}</p>}
+          {cameraError && (
+            <p className="error-text">
+              Camera unavailable: {cameraError}. Use search below, or scan the invite with your phone's own camera
+              app instead — it'll open this app directly.
+            </p>
+          )}
 
           <div className="manual-fallback">
             <input
@@ -127,63 +149,7 @@ export default function ScannerPage() {
         </>
       )}
 
-      {result && <ResultCard result={result} onOverride={handleOverride} onNext={scanNext} />}
-    </div>
-  );
-}
-
-function ResultCard({ result, onOverride, onNext }) {
-  if (result.status === 'invalid') {
-    return (
-      <div className="result-card result-invalid">
-        <h2>Invalid QR</h2>
-        <p>This code doesn't match any guest.</p>
-        <button onClick={onNext}>Scan next</button>
-      </div>
-    );
-  }
-
-  if (result.status === 'error') {
-    return (
-      <div className="result-card result-invalid">
-        <h2>Error</h2>
-        <p>{result.message}</p>
-        <button onClick={onNext}>Try again</button>
-      </div>
-    );
-  }
-
-  const { guest } = result;
-
-  if (result.status === 'duplicate') {
-    return (
-      <div className="result-card result-duplicate">
-        <h2>Already checked in</h2>
-        <p className="guest-name">
-          {guest.firstName} {guest.lastName}
-        </p>
-        <p>
-          Table {guest.table || '—'} · Seat {guest.seat || '—'}
-        </p>
-        <p className="muted">First checked in at {new Date(result.firstCheckedInAt).toLocaleTimeString()}</p>
-        <button className="override-button" onClick={onOverride}>
-          Check in anyway
-        </button>
-        <button onClick={onNext}>Scan next</button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="result-card result-success">
-      <h2>{result.status === 'checked_in_override' ? 'Checked in (override)' : 'Checked in'}</h2>
-      <p className="guest-name">
-        {guest.firstName} {guest.lastName}
-      </p>
-      <p>
-        Table {guest.table || '—'} · Seat {guest.seat || '—'}
-      </p>
-      <button onClick={onNext}>Scan next</button>
+      {result && <CheckinResultCard result={result} onOverride={handleOverride} onNext={scanNext} />}
     </div>
   );
 }

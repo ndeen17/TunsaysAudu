@@ -3,6 +3,7 @@ import { AuthProvider } from './auth/AuthContext.jsx';
 import { ProtectedRoute } from './auth/ProtectedRoute.jsx';
 import Login from './pages/Login.jsx';
 import ScannerPage from './pages/ScannerPage.jsx';
+import ScanTokenPage from './pages/ScanTokenPage.jsx';
 import OrganizerLayout from './pages/organizer/OrganizerLayout.jsx';
 import GuestsPage from './pages/organizer/GuestsPage.jsx';
 import InvitesPage from './pages/organizer/InvitesPage.jsx';
@@ -17,6 +18,14 @@ export default function App() {
           element={
             <ProtectedRoute roles={['organizer', 'security']}>
               <ScannerPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/scan/:token"
+          element={
+            <ProtectedRoute roles={['organizer', 'security']}>
+              <ScanTokenPage />
             </ProtectedRoute>
           }
         />
