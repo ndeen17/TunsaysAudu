@@ -3,7 +3,7 @@ import { inviteFontFaceCss, DISPLAY_FONT_FAMILY, BODY_FONT_FAMILY } from './font
 import { INVITE_CONTENT } from './inviteContent.js';
 
 const WIDTH = 1080;
-const HEIGHT = 1560;
+const HEIGHT = 1300;
 
 const COLOR = {
   bgDark: '#2b0404',
