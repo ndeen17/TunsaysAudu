@@ -30,11 +30,12 @@ describe('POST /api/guest-access/find', () => {
     expect(res.status).toBe(404);
   });
 
-  test('finds a guest case-insensitively and returns their id', async () => {
+  test('finds a guest case-insensitively and returns their id and display name', async () => {
     const guest = await makeGuest();
     const res = await request(app).post('/api/guest-access/find').send({ firstName: 'jane', lastName: 'DOE' });
     expect(res.status).toBe(200);
     expect(res.body.guestId).toBe(String(guest._id));
+    expect(res.body.displayName).toBe('Jane Doe');
   });
 
   test('two guests sharing a name return disambiguation options instead of a single id', async () => {
@@ -45,6 +46,29 @@ describe('POST /api/guest-access/find', () => {
     expect(res.status).toBe(200);
     expect(res.body.guestId).toBeUndefined();
     expect(res.body.options).toHaveLength(2);
+    expect(res.body.options.map((o) => o.displayName).sort()).toEqual(['Jane Doe & family', 'Jane Doe (plus one)']);
+  });
+});
+
+describe('GET /api/guest-access/:guestId/qr.png', () => {
+  beforeAll(connect);
+  afterEach(clearCollections);
+  afterAll(disconnect);
+
+  test('returns just the QR, not the full card, and records inviteGeneratedAt', async () => {
+    const guest = await makeGuest();
+    const res = await request(app).get(`/api/guest-access/${guest._id}/qr.png`);
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toBe('image/png');
+    expect(res.body.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
+
+    const stored = await Guest.findById(guest._id);
+    expect(stored.inviteGeneratedAt).not.toBeNull();
+  }, 15000);
+
+  test('unknown guest id returns 404', async () => {
+    const res = await request(app).get('/api/guest-access/000000000000000000000000/qr.png');
+    expect(res.status).toBe(404);
   });
 });
 

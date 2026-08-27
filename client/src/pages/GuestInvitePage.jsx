@@ -1,16 +1,32 @@
 import { useState } from 'react';
 import { post } from '../api/client.js';
 
+// Mirrors server/src/services/inviteContent.js — fixed wording for this
+// one-off wedding, kept in sync by hand rather than fetched, same as that
+// file's own rationale for being plain config instead of a setting.
+const WEDDING = {
+  familiesLine: 'Together with their families',
+  names: ['Tunrayo', 'Toby'],
+  verse: '“So they are no longer two, but one flesh. Therefore what God has joined together, let no one separate.”',
+  dayName: 'THURSDAY',
+  monthDay: 'SEPTEMBER 10',
+  year: '2026',
+  location: 'ENGLAND',
+};
+
 // Public, no-login page — a guest types their own name and gets back their
-// invite (with their unique QR baked in) to view or download, instead of
-// staff generating and sending it to each guest individually.
+// QR to view on screen or download, instead of staff generating and sending
+// it to each guest individually. The on-screen view is built from real
+// HTML/CSS (matching the rest of the site) rather than embedding the
+// branded invite artwork as an image — that PNG is only ever produced when
+// the guest explicitly asks to download it.
 export default function GuestInvitePage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [options, setOptions] = useState(null);
-  const [guestId, setGuestId] = useState(null);
+  const [guest, setGuest] = useState(null); // { guestId, displayName }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -22,7 +38,7 @@ export default function GuestInvitePage() {
       if (data.options) {
         setOptions(data.options);
       } else {
-        setGuestId(data.guestId);
+        setGuest({ guestId: data.guestId, displayName: data.displayName });
       }
     } catch (err) {
       setError(err.message);
@@ -32,24 +48,40 @@ export default function GuestInvitePage() {
   }
 
   function startOver() {
-    setGuestId(null);
+    setGuest(null);
     setOptions(null);
     setError('');
     setFirstName('');
     setLastName('');
   }
 
-  if (guestId) {
+  if (guest) {
     return (
       <div className="auth-screen">
-        <div className="auth-card invite-preview-card">
+        <div className="guest-invite">
           <button type="button" className="link-button back-link" onClick={startOver}>
             ← Search again
           </button>
-          <h1>Your invite</h1>
-          <img className="invite-preview" src={`/api/guest-access/${guestId}/invite.png`} alt="Your wedding invite" />
-          <a href={`/api/guest-access/${guestId}/invite.png?download=1`} download>
-            <button type="button">Download invite</button>
+          <p className="guest-invite-eyebrow">{WEDDING.familiesLine}</p>
+          <h1 className="guest-invite-names">
+            {WEDDING.names[0]} <span className="amp">&amp;</span> {WEDDING.names[1]}
+          </h1>
+          <p className="guest-invite-verse">{WEDDING.verse}</p>
+          <p className="guest-invite-date">
+            {WEDDING.dayName} · <strong>{WEDDING.monthDay}</strong> · {WEDDING.year}
+          </p>
+          <p className="guest-invite-location">{WEDDING.location}</p>
+
+          <div className="guest-invite-qr-box">
+            <p className="guest-invite-guest-name">{guest.displayName}</p>
+            <img src={`/api/guest-access/${guest.guestId}/qr.png`} alt="Your check-in QR code" />
+            <p className="guest-invite-note">Show this QR code at the venue for entry</p>
+          </div>
+
+          <a href={`/api/guest-access/${guest.guestId}/invite.png?download=1`} download>
+            <button type="button" className="secondary">
+              Download invite card
+            </button>
           </a>
         </div>
       </div>
@@ -66,8 +98,8 @@ export default function GuestInvitePage() {
           <h1>Which invite is yours?</h1>
           <p className="muted">We found more than one guest with that name.</p>
           {options.map((o) => (
-            <button key={o.guestId} type="button" className="role-choice" onClick={() => setGuestId(o.guestId)}>
-              <span className="role-choice-label">{o.envelopeName}</span>
+            <button key={o.guestId} type="button" className="role-choice" onClick={() => setGuest(o)}>
+              <span className="role-choice-label">{o.displayName}</span>
             </button>
           ))}
         </div>

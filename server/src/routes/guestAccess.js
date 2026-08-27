@@ -18,6 +18,10 @@ function exactCi(value) {
   return new RegExp(`^${escapeRegex(value.trim())}$`, 'i');
 }
 
+function displayNameFor(guest) {
+  return guest.envelopeName || `${guest.firstName} ${guest.lastName}`.trim();
+}
+
 router.post('/find', async (req, res) => {
   const { firstName, lastName } = req.body ?? {};
   if (!firstName?.trim() || !lastName?.trim()) {
@@ -34,12 +38,29 @@ router.post('/find', async (req, res) => {
   }
 
   if (matches.length === 1) {
-    return res.json({ guestId: matches[0]._id });
+    return res.json({ guestId: matches[0]._id, displayName: displayNameFor(matches[0]) });
   }
 
   // Rare (shared name) — let the guest pick their own envelope rather than
   // guessing which record is theirs.
-  res.json({ options: matches.map((g) => ({ guestId: g._id, envelopeName: g.envelopeName || `${g.firstName} ${g.lastName}` })) });
+  res.json({ options: matches.map((g) => ({ guestId: g._id, displayName: displayNameFor(g) })) });
+});
+
+// Just the QR (no card artwork around it) — this is what the guest-facing
+// page displays inline so it reads as a page on the site rather than an
+// embedded downloadable image. The full branded card is only ever served
+// through /invite.png, and only on an explicit download.
+router.get('/:guestId/qr.png', async (req, res) => {
+  const guest = await Guest.findById(req.params.guestId);
+  if (!guest) return res.status(404).json({ error: 'Guest not found' });
+
+  const png = await qrPngBuffer(guest.qrToken);
+  if (!guest.inviteGeneratedAt) {
+    guest.inviteGeneratedAt = new Date();
+    await guest.save();
+  }
+  res.set('Content-Type', 'image/png');
+  res.send(png);
 });
 
 router.get('/:guestId/invite.png', async (req, res) => {
