@@ -19,7 +19,7 @@ export default function OrganizerLayout() {
             Invites
           </NavLink>
           <NavLink to="/guests">Guests &amp; Seating</NavLink>
-          <NavLink to="/scanner">Scanner</NavLink>
+          <NavLink to="/checkin">Check-in</NavLink>
         </nav>
         <div className="app-header-right">
           <span className="muted">{user?.username}</span>

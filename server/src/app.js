@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.js';
 import guestRoutes from './routes/guests.js';
 import inviteRoutes from './routes/invites.js';
 import checkinRoutes from './routes/checkin.js';
+import guestAccessRoutes from './routes/guestAccess.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -19,6 +20,7 @@ export function createApp() {
   app.use('/api/guests', guestRoutes);
   app.use('/api/invites', inviteRoutes);
   app.use('/api/checkin', checkinRoutes);
+  app.use('/api/guest-access', guestAccessRoutes);
 
   app.get('/api/health', (req, res) => res.json({ ok: true }));
 

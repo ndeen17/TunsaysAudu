@@ -362,13 +362,6 @@ button.secondary {
   text-decoration: underline;
 }
 
-.scanner-video {
-  width: 100%;
-  flex: 1;
-  object-fit: cover;
-  background: #000;
-}
-
 .manual-fallback {
   padding: 1rem;
   background: #1c1c1c;

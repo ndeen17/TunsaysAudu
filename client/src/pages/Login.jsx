@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 
 const ROLE_INFO = {
@@ -10,7 +10,7 @@ const ROLE_INFO = {
   },
   security: {
     label: 'Security / Door Staff',
-    blurb: 'Scan QR codes and check guests in',
+    blurb: 'Look up and check guests in manually',
     heading: 'Security sign in',
   },
 };
@@ -31,7 +31,7 @@ export default function Login() {
     setBusy(true);
     try {
       const me = await login(username, password);
-      const dest = location.state?.from || (me.role === 'security' ? '/scanner' : '/');
+      const dest = location.state?.from || (me.role === 'security' ? '/checkin' : '/');
       navigate(dest, { replace: true });
     } catch (err) {
       setError(err.message);
@@ -59,6 +59,9 @@ export default function Login() {
               <span className="role-choice-blurb">{info.blurb}</span>
             </button>
           ))}
+          <Link to="/my-invite" className="link-button back-link">
+            Looking for your invite? Find it here →
+          </Link>
         </div>
       </div>
     );

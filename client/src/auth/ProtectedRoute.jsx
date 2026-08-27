@@ -17,7 +17,7 @@ export function ProtectedRoute({ roles, children }) {
     // Redirect to somewhere this user's own role is allowed, not a fixed
     // route — otherwise a security-only user hitting an organizer-only
     // route would be bounced to "/" (also organizer-only) and loop forever.
-    return <Navigate to={user.role === 'security' ? '/scanner' : '/'} replace />;
+    return <Navigate to={user.role === 'security' ? '/checkin' : '/'} replace />;
   }
 
   return children;

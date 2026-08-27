@@ -48,8 +48,8 @@ export default function ScanTokenPage() {
         <CheckinResultCard
           result={result}
           onOverride={handleOverride}
-          onNext={() => navigate('/scanner')}
-          nextLabel="Open scanner"
+          onNext={() => navigate('/checkin')}
+          nextLabel="Done"
         />
       )}
     </div>
