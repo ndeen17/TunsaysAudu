@@ -23,7 +23,7 @@ export default function GuestInvitePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [options, setOptions] = useState(null);
-  const [guest, setGuest] = useState(null); // { guestId, displayName }
+  const [guest, setGuest] = useState(null); // { guestId, displayName, table, seat }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -35,7 +35,7 @@ export default function GuestInvitePage() {
       if (data.options) {
         setOptions(data.options);
       } else {
-        setGuest({ guestId: data.guestId, displayName: data.displayName });
+        setGuest({ guestId: data.guestId, displayName: data.displayName, table: data.table, seat: data.seat });
       }
     } catch (err) {
       setError(err.message);
