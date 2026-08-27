@@ -15,7 +15,7 @@ function fileNameFor(guest) {
 
 router.get('/preview', async (req, res) => {
   const qrBuffer = await qrPngBuffer(generateQrToken());
-  const png = await renderInvitePng({ displayName: 'Jane Doe', qrBuffer });
+  const png = await renderInvitePng({ displayName: 'Jane Doe', qrBuffer, table: '5', seat: '2' });
   res.set('Content-Type', 'image/png');
   res.send(png);
 });
@@ -26,7 +26,7 @@ router.get('/:guestId', async (req, res) => {
 
   const displayName = guest.envelopeName || `${guest.firstName} ${guest.lastName}`.trim();
   const qrBuffer = await qrPngBuffer(guest.qrToken);
-  const png = await renderInvitePng({ displayName, qrBuffer });
+  const png = await renderInvitePng({ displayName, qrBuffer, table: guest.table, seat: guest.seat });
   guest.inviteGeneratedAt = new Date();
   await guest.save();
   res.set('Content-Type', 'image/png');
@@ -50,7 +50,7 @@ router.post('/batch', async (req, res) => {
     try {
       const displayName = guest.envelopeName || `${guest.firstName} ${guest.lastName}`.trim();
       const qrBuffer = await qrPngBuffer(guest.qrToken);
-      const png = await renderInvitePng({ displayName, qrBuffer });
+      const png = await renderInvitePng({ displayName, qrBuffer, table: guest.table, seat: guest.seat });
       guest.inviteGeneratedAt = new Date();
       await guest.save();
       archive.append(png, { name: fileNameFor(guest) });

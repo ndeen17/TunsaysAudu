@@ -30,12 +30,14 @@ describe('POST /api/guest-access/find', () => {
     expect(res.status).toBe(404);
   });
 
-  test('finds a guest case-insensitively and returns their id and display name', async () => {
-    const guest = await makeGuest();
+  test('finds a guest case-insensitively and returns their id, display name, table, and seat', async () => {
+    const guest = await makeGuest({ table: '5', seat: '2' });
     const res = await request(app).post('/api/guest-access/find').send({ firstName: 'jane', lastName: 'DOE' });
     expect(res.status).toBe(200);
     expect(res.body.guestId).toBe(String(guest._id));
     expect(res.body.displayName).toBe('Jane Doe');
+    expect(res.body.table).toBe('5');
+    expect(res.body.seat).toBe('2');
   });
 
   test('two guests sharing a name return disambiguation options instead of a single id', async () => {

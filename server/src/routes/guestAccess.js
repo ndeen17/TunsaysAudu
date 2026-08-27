@@ -31,19 +31,22 @@ router.post('/find', async (req, res) => {
   const matches = await Guest.find({
     firstName: exactCi(firstName),
     lastName: exactCi(lastName),
-  }).select('firstName lastName envelopeName');
+  }).select('firstName lastName envelopeName table seat');
 
   if (matches.length === 0) {
     return res.status(404).json({ error: "We couldn't find an invite under that name. Please check the spelling." });
   }
 
   if (matches.length === 1) {
-    return res.json({ guestId: matches[0]._id, displayName: displayNameFor(matches[0]) });
+    const g = matches[0];
+    return res.json({ guestId: g._id, displayName: displayNameFor(g), table: g.table, seat: g.seat });
   }
 
   // Rare (shared name) — let the guest pick their own envelope rather than
   // guessing which record is theirs.
-  res.json({ options: matches.map((g) => ({ guestId: g._id, displayName: displayNameFor(g) })) });
+  res.json({
+    options: matches.map((g) => ({ guestId: g._id, displayName: displayNameFor(g), table: g.table, seat: g.seat })),
+  });
 });
 
 // Just the QR (no card artwork around it) — this is what the guest-facing
@@ -69,7 +72,7 @@ router.get('/:guestId/invite.png', async (req, res) => {
 
   const displayName = guest.envelopeName || `${guest.firstName} ${guest.lastName}`.trim();
   const qrBuffer = await qrPngBuffer(guest.qrToken);
-  const png = await renderInvitePng({ displayName, qrBuffer });
+  const png = await renderInvitePng({ displayName, qrBuffer, table: guest.table, seat: guest.seat });
   guest.inviteGeneratedAt = new Date();
   await guest.save();
 

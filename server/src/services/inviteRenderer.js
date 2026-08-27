@@ -3,7 +3,7 @@ import { inviteFontFaceCss, DISPLAY_FONT_FAMILY, BODY_FONT_FAMILY } from './font
 import { INVITE_CONTENT } from './inviteContent.js';
 
 const WIDTH = 1080;
-const HEIGHT = 1480;
+const HEIGHT = 1600;
 
 const COLOR = {
   bgDark: '#2b0404',
@@ -38,10 +38,6 @@ function wrapText(text, maxWidth, fontSize, avgCharWidthRatio = 0.5) {
   return lines;
 }
 
-function estimateWidth(text, fontSize, avgCharWidthRatio = 0.55) {
-  return text.length * fontSize * avgCharWidthRatio;
-}
-
 function text(x, y, str, { size, family = DISPLAY_FONT_FAMILY, weight = 500, style = 'normal', fill = COLOR.cream, spacing = 0, anchor = 'middle' }) {
   return `<text x="${x}" y="${y}" font-family="${family}" font-size="${size}" font-weight="${weight}" font-style="${style}" fill="${fill}" letter-spacing="${spacing}" text-anchor="${anchor}">${escapeXml(str)}</text>`;
 }
@@ -55,7 +51,7 @@ function textLines(x, y, lines, opts) {
 // decorative arch frame, all copy, the guest's name, and their QR code all
 // drawn in code (no uploaded artwork). Deterministic and identical in
 // layout for every guest; only the name and QR differ.
-export async function renderInvitePng({ displayName, qrBuffer }) {
+export async function renderInvitePng({ displayName, qrBuffer, table, seat }) {
   const cx = WIDTH / 2;
   const c = INVITE_CONTENT;
   const parts = [];
@@ -104,41 +100,29 @@ export async function renderInvitePng({ displayName, qrBuffer }) {
   parts.push(
     textLines(cx, y, verseLines, { size: 30, family: BODY_FONT_FAMILY, style: 'italic', fill: COLOR.creamMuted, lineHeight: 42 })
   );
-  y += verseLines.length * 42 + 70;
+  y += verseLines.length * 42 + 55;
 
-  // Date row: DAY NAME | MONTH DAY | YEAR, with the month/day emphasized in
-  // the middle and thin vertical dividers either side.
-  const monthDaySize = 46;
-  const sideSize = 26;
-  const monthDayHalfWidth = estimateWidth(c.monthDay, monthDaySize) / 2;
-  const dividerGap = 34;
-  parts.push(text(cx, y, c.monthDay, { size: monthDaySize, weight: 800, spacing: 2 }));
-  const leftDividerX = cx - monthDayHalfWidth - dividerGap;
-  const rightDividerX = cx + monthDayHalfWidth + dividerGap;
-  parts.push(`<line x1="${leftDividerX}" y1="${y - 34}" x2="${leftDividerX}" y2="${y + 8}" stroke="${COLOR.gold}" stroke-width="1.5" />`);
-  parts.push(`<line x1="${rightDividerX}" y1="${y - 34}" x2="${rightDividerX}" y2="${y + 8}" stroke="${COLOR.gold}" stroke-width="1.5" />`);
-  parts.push(text(leftDividerX - 24, y - 6, c.dayName, { size: sideSize, weight: 500, spacing: 2, anchor: 'end', fill: COLOR.creamMuted }));
-  parts.push(text(rightDividerX + 24, y - 6, c.year, { size: sideSize, weight: 500, spacing: 2, anchor: 'start', fill: COLOR.creamMuted }));
-
-  y += 70;
   parts.push(text(cx, y, c.location, { size: 30, weight: 500, spacing: 6, fill: COLOR.cream }));
 
-  // Guest QR box — name, then a large centered QR, then a short note,
-  // stacked vertically so the code itself is the dominant, easy-to-scan
-  // element rather than sharing width with text.
+  // Guest QR box — name, table/seat, then a large centered QR, then a short
+  // note, stacked vertically so the code itself is the dominant, easy-to-
+  // scan element rather than sharing width with text.
   const boxWidth = WIDTH * 0.62;
   const boxX = cx - boxWidth / 2;
-  const boxY = y + 60;
-  const qrSize = WIDTH * 0.26;
+  const boxY = y + 80;
+  const qrSize = WIDTH * 0.34;
   const nameSize = 32;
+  const seatSize = 24;
   const noteSize = 23;
   const padTop = 44;
   const padBottom = 44;
-  const gapAfterName = 30;
+  const gapAfterName = 16;
+  const gapAfterSeat = 28;
   const gapAfterQr = 30;
   const noteLines = wrapText('Please scan this QR code at the venue for entry', boxWidth - 80, noteSize, 0.48);
   const noteBlockHeight = noteLines.length * noteSize * 1.35;
-  const boxHeight = padTop + nameSize * 1.2 + gapAfterName + qrSize + gapAfterQr + noteBlockHeight + padBottom;
+  const boxHeight =
+    padTop + nameSize * 1.2 + gapAfterName + seatSize * 1.2 + gapAfterSeat + qrSize + gapAfterQr + noteBlockHeight + padBottom;
 
   parts.push(
     `<rect x="${boxX}" y="${boxY}" width="${boxWidth}" height="${boxHeight}" rx="18" fill="rgba(246,237,225,0.05)" stroke="${COLOR.gold}" stroke-width="1.5" />`
@@ -147,7 +131,12 @@ export async function renderInvitePng({ displayName, qrBuffer }) {
   let innerY = boxY + padTop + nameSize;
   parts.push(text(cx, innerY, displayName.toUpperCase(), { size: nameSize, weight: 800, fill: COLOR.gold, spacing: 1 }));
 
-  const qrTop = innerY + gapAfterName;
+  innerY += gapAfterName + seatSize;
+  parts.push(
+    text(cx, innerY, `TABLE ${table || '—'}   ·   SEAT ${seat || '—'}`, { size: seatSize, weight: 600, fill: COLOR.creamMuted, spacing: 1 })
+  );
+
+  const qrTop = innerY + gapAfterSeat;
   const qrLeft = cx - qrSize / 2;
   const qrBase64 = qrBuffer.toString('base64');
   parts.push(`<rect x="${qrLeft - 10}" y="${qrTop - 10}" width="${qrSize + 20}" height="${qrSize + 20}" rx="10" fill="#ffffff" />`);

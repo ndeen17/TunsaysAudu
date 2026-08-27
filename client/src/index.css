@@ -306,17 +306,6 @@ button.secondary {
   color: var(--muted);
 }
 
-.guest-invite-date {
-  margin: 0.25rem 0 0;
-  letter-spacing: 2px;
-  font-size: 0.95rem;
-}
-
-.guest-invite-date strong {
-  font-size: 1.2rem;
-  color: var(--accent);
-}
-
 .guest-invite-location {
   margin: 0 0 0.5rem;
   letter-spacing: 4px;
@@ -344,8 +333,15 @@ button.secondary {
   color: var(--accent);
 }
 
+.guest-invite-seat {
+  margin: 0;
+  letter-spacing: 1px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 .guest-invite-qr-box img {
-  width: min(240px, 70vw);
+  width: min(300px, 80vw);
   height: auto;
   padding: 10px;
   background: #fff;

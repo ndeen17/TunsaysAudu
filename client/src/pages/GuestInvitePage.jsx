@@ -8,9 +8,6 @@ const WEDDING = {
   familiesLine: 'Together with their families',
   names: ['Tunrayo', 'Toby'],
   verse: '“So they are no longer two, but one flesh. Therefore what God has joined together, let no one separate.”',
-  dayName: 'THURSDAY',
-  monthDay: 'SEPTEMBER 10',
-  year: '2026',
   location: 'ENGLAND',
 };
 
@@ -67,13 +64,13 @@ export default function GuestInvitePage() {
             {WEDDING.names[0]} <span className="amp">&amp;</span> {WEDDING.names[1]}
           </h1>
           <p className="guest-invite-verse">{WEDDING.verse}</p>
-          <p className="guest-invite-date">
-            {WEDDING.dayName} · <strong>{WEDDING.monthDay}</strong> · {WEDDING.year}
-          </p>
           <p className="guest-invite-location">{WEDDING.location}</p>
 
           <div className="guest-invite-qr-box">
             <p className="guest-invite-guest-name">{guest.displayName}</p>
+            <p className="guest-invite-seat">
+              TABLE {guest.table || '—'} &nbsp;·&nbsp; SEAT {guest.seat || '—'}
+            </p>
             <img src={`/api/guest-access/${guest.guestId}/qr.png`} alt="Your check-in QR code" />
             <p className="guest-invite-note">Show this QR code at the venue for entry</p>
           </div>
